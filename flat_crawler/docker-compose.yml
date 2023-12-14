@@ -1,0 +1,41 @@
+version: '3'
+
+services:
+    db:
+
+        image: postgres:alpine
+        # restart: always
+        ports:
+            - "5432:5432"
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: SPS_pass
+            POSTGRES_DB: flats
+            PGDATA: /tmp/pgdata
+        volumes:
+            - postgres_data:/tmp/pgdata
+
+    spiders:
+        build:
+            context: .
+        # restart: always
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: SPS_pass
+            POSTGRES_DB: flats
+        volumes:
+            - ./server:/usr/src/server
+        depends_on:
+            - db
+
+    web:
+        build: ./server
+        # restart: always
+        ports:
+            - "8080:8080"
+        volumes:
+            - ./server:/usr/src/server
+        depends_on:
+            - db #
+volumes:
+  postgres_data:
